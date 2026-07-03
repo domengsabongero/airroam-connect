@@ -108,7 +108,7 @@ function CountryPage() {
         <div className="mx-auto max-w-6xl">
           <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Travel tips for {c.name}</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {c.tips.map((t, i) => (
+            {c.tips.map((t: string, i: number) => (
               <div key={t} className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <div className="font-mono text-[10px] uppercase tracking-widest text-teal">Tip {i + 1}</div>
                 <p className="mt-3 text-sm text-foreground/85">{t}</p>
