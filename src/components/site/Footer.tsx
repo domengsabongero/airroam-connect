@@ -1,88 +1,77 @@
-const columns = [
+import { Link } from "@tanstack/react-router";
+
+const cols = [
   {
-    title: "Product",
-    links: ["eSIM Global", "Travel SIM", "Pocket WiFi", "Business fleet"],
+    title: "Products",
+    links: [
+      { name: "DRET eSIM", to: "/esim" as const },
+      { name: "Travel SIM", to: "/travel-sim" as const },
+      { name: "Air-Roam Pocket WiFi", to: "/pocket-wifi" as const },
+      { name: "Enterprise Solutions", to: "/enterprise" as const },
+      { name: "Pricing", to: "/pricing" as const },
+    ],
+  },
+  {
+    title: "Explore",
+    links: [
+      { name: "Destinations", to: "/destinations" as const },
+      { name: "Find my plan", to: "/planner" as const },
+      { name: "AI Assistant", to: "/assistant" as const },
+      { name: "What is eSIM?", to: "/what-is-esim" as const },
+    ],
   },
   {
     title: "Support",
-    links: ["Help center", "Device checker", "Coverage map", "Network status"],
+    links: [
+      { name: "Help center", to: "/support" as const },
+      { name: "FAQ", to: "/faq" as const },
+      { name: "Contact", to: "/contact" as const },
+    ],
   },
   {
     title: "Company",
-    links: ["About", "Press", "Partners", "Careers"],
+    links: [
+      { name: "About", to: "/about" as const },
+      { name: "Affiliates", to: "/affiliates" as const },
+    ],
   },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/5 px-6 pt-24 pb-10">
+    <footer className="relative border-t border-border bg-surface px-6 pt-20 pb-10">
       <div className="mx-auto max-w-7xl">
-        {/* CTA banner */}
-        <div className="glass relative mb-24 overflow-hidden rounded-3xl px-8 py-14 text-center sm:px-14">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            aria-hidden
-            style={{
-              background:
-                "radial-gradient(circle at 50% 0%, oklch(0.82 0.19 155 / 0.35), transparent 60%)",
-            }}
-          />
-          <p className="relative font-mono text-[11px] uppercase tracking-[0.2em] text-aurora">
-            Take off with confidence
-          </p>
-          <h3 className="relative mt-3 font-display text-3xl font-bold tracking-tight sm:text-5xl">
-            Your next trip deserves better signal.
-          </h3>
-          <div className="relative mt-8 flex flex-wrap justify-center gap-3">
-            <a
-              href="#plan"
-              className="inline-flex items-center gap-2 rounded-full bg-aurora px-6 py-3 text-sm font-semibold text-background shadow-glow transition-transform hover:scale-[1.03]"
-            >
-              Find my plan
-            </a>
-            <a
-              href="#assistant"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-white/10"
-            >
-              Talk to assistant
-            </a>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-12 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
           <div className="col-span-2">
-            <div className="flex items-center gap-2">
-              <span className="size-2.5 rounded-full bg-aurora shadow-glow" />
+            <Link to="/" className="flex items-center gap-2">
+              <span className="grid size-8 place-items-center rounded-xl bg-sunrise text-white shadow-glow-amber">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
+                  <path d="M2 12l20-8-8 20-2-9-10-3z" />
+                </svg>
+              </span>
               <span className="font-display text-lg font-bold tracking-tight">Air-Roam</span>
-            </div>
+            </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              Premium travel connectivity for the modern explorer. Serving over 190 countries with
-              zero roaming fees.
+              Premium travel connectivity for the modern explorer. 190+ countries, zero roaming fees, one dashboard.
             </p>
-            <form className="mt-8 flex max-w-sm items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] p-1 pl-4">
+            <form className="mt-6 flex max-w-sm items-center gap-2 rounded-full border border-border bg-background p-1 pl-4" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="you@wherever.com"
-                aria-label="Email for travel tips"
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+                aria-label="Newsletter email"
+                className="min-w-0 flex-1 bg-transparent text-sm placeholder:text-muted-foreground/60 focus:outline-none"
               />
-              <button className="rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background">
-                Subscribe
-              </button>
+              <button className="shrink-0 rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background">Subscribe</button>
             </form>
           </div>
 
-          {columns.map((c) => (
+          {cols.map((c) => (
             <div key={c.title}>
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-aurora">
-                {c.title}
-              </h4>
-              <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
+              <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">{c.title}</h4>
+              <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
                 {c.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="transition-colors hover:text-foreground">
-                      {l}
-                    </a>
+                  <li key={l.name}>
+                    <Link to={l.to} className="transition-colors hover:text-foreground">{l.name}</Link>
                   </li>
                 ))}
               </ul>
@@ -90,10 +79,8 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 md:flex-row">
-          <p className="font-mono text-[11px] text-muted-foreground">
-            © 2026 Air-Roam Connectivity Ltd. All signals rights reserved.
-          </p>
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+          <p className="font-mono text-[11px] text-muted-foreground">© 2026 Air-Roam Connectivity Ltd.</p>
           <div className="flex gap-6 text-xs text-muted-foreground">
             <a href="#" className="hover:text-foreground">Privacy</a>
             <a href="#" className="hover:text-foreground">Terms</a>

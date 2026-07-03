@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Air-Roam design system — Midnight Aurora
- * Premium travel connectivity. Deep midnight base with aurora-green accent.
+ * Air-Roam 3.0 — Sunrise Horizon
+ * Bright travel-inspired palette: amber + teal + sky on white.
  */
 
 @theme inline {
@@ -20,6 +20,7 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -32,8 +33,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-aurora: var(--aurora);
-  --color-aurora-glow: var(--aurora-glow);
+  --color-amber: var(--amber);
+  --color-teal: var(--teal);
+  --color-sky: var(--sky);
+  --color-success: var(--success);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -47,56 +50,51 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
-  /* Midnight base */
-  --background: oklch(0.15 0.02 260);
-  --foreground: oklch(0.98 0.005 250);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.18 0.02 250);
 
-  --card: oklch(0.19 0.02 260);
-  --card-foreground: oklch(0.98 0.005 250);
+  --surface: oklch(0.98 0.005 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 250);
 
-  --popover: oklch(0.19 0.02 260);
-  --popover-foreground: oklch(0.98 0.005 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 250);
 
-  --primary: oklch(0.98 0.005 250);
-  --primary-foreground: oklch(0.15 0.02 260);
+  --primary: oklch(0.75 0.16 65);           /* amber #F59E0B */
+  --primary-foreground: oklch(0.18 0.02 250);
 
-  --secondary: oklch(0.24 0.02 260);
-  --secondary-foreground: oklch(0.98 0.005 250);
+  --secondary: oklch(0.96 0.01 240);
+  --secondary-foreground: oklch(0.22 0.02 250);
 
-  --muted: oklch(0.22 0.02 260);
-  --muted-foreground: oklch(0.68 0.02 255);
+  --muted: oklch(0.965 0.006 240);
+  --muted-foreground: oklch(0.48 0.02 250);
 
-  --accent: oklch(0.24 0.02 260);
-  --accent-foreground: oklch(0.98 0.005 250);
+  --accent: oklch(0.97 0.008 240);
+  --accent-foreground: oklch(0.2 0.02 250);
 
-  /* Aurora — signature accent */
-  --aurora: oklch(0.82 0.19 155);
-  --aurora-glow: oklch(0.82 0.19 155 / 0.5);
+  --amber: oklch(0.76 0.16 65);             /* #F59E0B */
+  --teal: oklch(0.72 0.13 190);             /* #14B8A6 */
+  --sky: oklch(0.79 0.13 235);              /* #38BDF8 */
+  --success: oklch(0.72 0.16 155);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
 
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 250);
+  --border: oklch(0.92 0.006 245);
+  --input: oklch(0.92 0.006 245);
+  --ring: oklch(0.76 0.16 65);
 
-  --border: oklch(1 0 0 / 0.08);
-  --input: oklch(1 0 0 / 0.1);
-  --ring: oklch(0.82 0.19 155);
+  --gradient-sunrise: linear-gradient(135deg, oklch(0.76 0.16 65) 0%, oklch(0.79 0.13 235) 100%);
+  --gradient-horizon: linear-gradient(135deg, oklch(0.79 0.13 235) 0%, oklch(0.72 0.13 190) 100%);
+  --gradient-sky-soft: radial-gradient(ellipse 90% 60% at 50% 0%, oklch(0.94 0.05 230 / 0.6), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, oklch(0.9 0.08 60 / 0.35), transparent 70%),
+    linear-gradient(to bottom, oklch(1 0 0), oklch(0.98 0.005 250));
 
-  /* Gradients & shadows */
-  --gradient-sky: radial-gradient(
-      ellipse 90% 60% at 50% 0%,
-      oklch(0.32 0.09 245 / 0.55),
-      transparent 60%
-    ),
-    radial-gradient(ellipse 60% 40% at 80% 20%, oklch(0.55 0.14 195 / 0.25), transparent 70%),
-    linear-gradient(to bottom, oklch(0.15 0.02 260), oklch(0.15 0.02 260));
-  --gradient-aurora: linear-gradient(
-    135deg,
-    oklch(0.82 0.19 155) 0%,
-    oklch(0.75 0.16 190) 100%
-  );
-  --shadow-glow: 0 0 40px oklch(0.82 0.19 155 / 0.35);
-  --shadow-elevated: 0 20px 60px -20px oklch(0 0 0 / 0.6);
+  --shadow-card: 0 1px 2px oklch(0.18 0.02 250 / 0.04), 0 8px 24px -8px oklch(0.18 0.02 250 / 0.08);
+  --shadow-elevated: 0 20px 60px -20px oklch(0.18 0.02 250 / 0.18);
+  --shadow-glow-amber: 0 12px 40px -8px oklch(0.76 0.16 65 / 0.45);
+  --shadow-glow-teal: 0 12px 40px -8px oklch(0.72 0.13 190 / 0.4);
 }
 
 @layer base {
@@ -117,66 +115,74 @@
   }
 
   ::selection {
-    background: oklch(0.82 0.19 155 / 0.35);
-    color: oklch(0.98 0.005 250);
+    background: oklch(0.76 0.16 65 / 0.3);
+    color: oklch(0.18 0.02 250);
   }
 }
 
-/* --- Air-Roam utilities --- */
+/* Utilities */
 
-@utility bg-sky-gradient {
-  background: var(--gradient-sky);
+@utility bg-sky-soft {
+  background: var(--gradient-sky-soft);
 }
-
-@utility bg-aurora-gradient {
-  background: var(--gradient-aurora);
+@utility bg-sunrise {
+  background: var(--gradient-sunrise);
 }
-
-@utility text-gradient {
-  background: linear-gradient(
-    180deg,
-    oklch(0.98 0.005 250) 0%,
-    oklch(0.72 0.02 255) 100%
-  );
+@utility bg-horizon {
+  background: var(--gradient-horizon);
+}
+@utility text-gradient-sunrise {
+  background: var(--gradient-sunrise);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
-
-@utility glass {
-  background: color-mix(in oklab, white 3%, transparent);
-  backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid color-mix(in oklab, white 8%, transparent);
+@utility surface {
+  background: var(--color-surface);
 }
-
-@utility shadow-glow {
-  box-shadow: var(--shadow-glow);
+@utility card-soft {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
-
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
 @utility shadow-elevated {
   box-shadow: var(--shadow-elevated);
 }
+@utility shadow-glow-amber {
+  box-shadow: var(--shadow-glow-amber);
+}
+@utility shadow-glow-teal {
+  box-shadow: var(--shadow-glow-teal);
+}
+@utility glass-light {
+  background: color-mix(in oklab, white 70%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid color-mix(in oklab, oklch(0.18 0.02 250) 6%, transparent);
+}
 
-/* --- Animations --- */
+/* Animations */
 
 @keyframes drift {
-  0% { transform: translateX(-8%); }
-  100% { transform: translateX(8%); }
+  0% { transform: translateX(-6%); }
+  100% { transform: translateX(6%); }
 }
 @keyframes flight-arc {
-  0% { transform: translate(-15vw, 40px) rotate(8deg); opacity: 0; }
+  0% { transform: translate(-15vw, 40px) rotate(6deg); opacity: 0; }
   8% { opacity: 1; }
   92% { opacity: 1; }
-  100% { transform: translate(110vw, -60px) rotate(8deg); opacity: 0; }
+  100% { transform: translate(110vw, -60px) rotate(6deg); opacity: 0; }
 }
 @keyframes plane-trail {
-  0%, 100% { opacity: 0.5; }
+  0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
 }
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-10px); }
 }
 @keyframes pulse-ring {
   0% { transform: scale(0.5); opacity: 0.8; }
@@ -186,16 +192,16 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @utility animate-drift {
   animation: drift 40s ease-in-out infinite alternate;
 }
 @utility animate-flight {
-  animation: flight-arc 18s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: flight-arc 20s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 @utility animate-plane-trail {
   animation: plane-trail 2.5s ease-in-out infinite;
@@ -207,5 +213,8 @@
   animation: pulse-ring 2.8s ease-out infinite;
 }
 @utility animate-spin-slow {
-  animation: spin-slow 60s linear infinite;
+  animation: spin-slow 90s linear infinite;
+}
+@utility animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
 }

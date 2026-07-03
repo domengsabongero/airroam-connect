@@ -9,38 +9,328 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhatIsEsimRouteImport } from './routes/what-is-esim'
+import { Route as TravelSimRouteImport } from './routes/travel-sim'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PocketWifiRouteImport } from './routes/pocket-wifi'
+import { Route as PlannerRouteImport } from './routes/planner'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as EsimRouteImport } from './routes/esim'
+import { Route as EnterpriseRouteImport } from './routes/enterprise'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as AffiliatesRouteImport } from './routes/affiliates'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DestinationsIndexRouteImport } from './routes/destinations.index'
+import { Route as DestinationsCountryRouteImport } from './routes/destinations.$country'
 
+const WhatIsEsimRoute = WhatIsEsimRouteImport.update({
+  id: '/what-is-esim',
+  path: '/what-is-esim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelSimRoute = TravelSimRouteImport.update({
+  id: '/travel-sim',
+  path: '/travel-sim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PocketWifiRoute = PocketWifiRouteImport.update({
+  id: '/pocket-wifi',
+  path: '/pocket-wifi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlannerRoute = PlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsimRoute = EsimRouteImport.update({
+  id: '/esim',
+  path: '/esim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnterpriseRoute = EnterpriseRouteImport.update({
+  id: '/enterprise',
+  path: '/enterprise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AffiliatesRoute = AffiliatesRouteImport.update({
+  id: '/affiliates',
+  path: '/affiliates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DestinationsIndexRoute = DestinationsIndexRouteImport.update({
+  id: '/destinations/',
+  path: '/destinations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DestinationsCountryRoute = DestinationsCountryRouteImport.update({
+  id: '/destinations/$country',
+  path: '/destinations/$country',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/affiliates': typeof AffiliatesRoute
+  '/assistant': typeof AssistantRoute
+  '/contact': typeof ContactRoute
+  '/enterprise': typeof EnterpriseRoute
+  '/esim': typeof EsimRoute
+  '/faq': typeof FaqRoute
+  '/planner': typeof PlannerRoute
+  '/pocket-wifi': typeof PocketWifiRoute
+  '/pricing': typeof PricingRoute
+  '/support': typeof SupportRoute
+  '/travel-sim': typeof TravelSimRoute
+  '/what-is-esim': typeof WhatIsEsimRoute
+  '/destinations/$country': typeof DestinationsCountryRoute
+  '/destinations/': typeof DestinationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/affiliates': typeof AffiliatesRoute
+  '/assistant': typeof AssistantRoute
+  '/contact': typeof ContactRoute
+  '/enterprise': typeof EnterpriseRoute
+  '/esim': typeof EsimRoute
+  '/faq': typeof FaqRoute
+  '/planner': typeof PlannerRoute
+  '/pocket-wifi': typeof PocketWifiRoute
+  '/pricing': typeof PricingRoute
+  '/support': typeof SupportRoute
+  '/travel-sim': typeof TravelSimRoute
+  '/what-is-esim': typeof WhatIsEsimRoute
+  '/destinations/$country': typeof DestinationsCountryRoute
+  '/destinations': typeof DestinationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/affiliates': typeof AffiliatesRoute
+  '/assistant': typeof AssistantRoute
+  '/contact': typeof ContactRoute
+  '/enterprise': typeof EnterpriseRoute
+  '/esim': typeof EsimRoute
+  '/faq': typeof FaqRoute
+  '/planner': typeof PlannerRoute
+  '/pocket-wifi': typeof PocketWifiRoute
+  '/pricing': typeof PricingRoute
+  '/support': typeof SupportRoute
+  '/travel-sim': typeof TravelSimRoute
+  '/what-is-esim': typeof WhatIsEsimRoute
+  '/destinations/$country': typeof DestinationsCountryRoute
+  '/destinations/': typeof DestinationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/affiliates'
+    | '/assistant'
+    | '/contact'
+    | '/enterprise'
+    | '/esim'
+    | '/faq'
+    | '/planner'
+    | '/pocket-wifi'
+    | '/pricing'
+    | '/support'
+    | '/travel-sim'
+    | '/what-is-esim'
+    | '/destinations/$country'
+    | '/destinations/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/affiliates'
+    | '/assistant'
+    | '/contact'
+    | '/enterprise'
+    | '/esim'
+    | '/faq'
+    | '/planner'
+    | '/pocket-wifi'
+    | '/pricing'
+    | '/support'
+    | '/travel-sim'
+    | '/what-is-esim'
+    | '/destinations/$country'
+    | '/destinations'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/affiliates'
+    | '/assistant'
+    | '/contact'
+    | '/enterprise'
+    | '/esim'
+    | '/faq'
+    | '/planner'
+    | '/pocket-wifi'
+    | '/pricing'
+    | '/support'
+    | '/travel-sim'
+    | '/what-is-esim'
+    | '/destinations/$country'
+    | '/destinations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AffiliatesRoute: typeof AffiliatesRoute
+  AssistantRoute: typeof AssistantRoute
+  ContactRoute: typeof ContactRoute
+  EnterpriseRoute: typeof EnterpriseRoute
+  EsimRoute: typeof EsimRoute
+  FaqRoute: typeof FaqRoute
+  PlannerRoute: typeof PlannerRoute
+  PocketWifiRoute: typeof PocketWifiRoute
+  PricingRoute: typeof PricingRoute
+  SupportRoute: typeof SupportRoute
+  TravelSimRoute: typeof TravelSimRoute
+  WhatIsEsimRoute: typeof WhatIsEsimRoute
+  DestinationsCountryRoute: typeof DestinationsCountryRoute
+  DestinationsIndexRoute: typeof DestinationsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/what-is-esim': {
+      id: '/what-is-esim'
+      path: '/what-is-esim'
+      fullPath: '/what-is-esim'
+      preLoaderRoute: typeof WhatIsEsimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel-sim': {
+      id: '/travel-sim'
+      path: '/travel-sim'
+      fullPath: '/travel-sim'
+      preLoaderRoute: typeof TravelSimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pocket-wifi': {
+      id: '/pocket-wifi'
+      path: '/pocket-wifi'
+      fullPath: '/pocket-wifi'
+      preLoaderRoute: typeof PocketWifiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planner': {
+      id: '/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof PlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esim': {
+      id: '/esim'
+      path: '/esim'
+      fullPath: '/esim'
+      preLoaderRoute: typeof EsimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enterprise': {
+      id: '/enterprise'
+      path: '/enterprise'
+      fullPath: '/enterprise'
+      preLoaderRoute: typeof EnterpriseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/affiliates': {
+      id: '/affiliates'
+      path: '/affiliates'
+      fullPath: '/affiliates'
+      preLoaderRoute: typeof AffiliatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +338,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/destinations/': {
+      id: '/destinations/'
+      path: '/destinations'
+      fullPath: '/destinations/'
+      preLoaderRoute: typeof DestinationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destinations/$country': {
+      id: '/destinations/$country'
+      path: '/destinations/$country'
+      fullPath: '/destinations/$country'
+      preLoaderRoute: typeof DestinationsCountryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AffiliatesRoute: AffiliatesRoute,
+  AssistantRoute: AssistantRoute,
+  ContactRoute: ContactRoute,
+  EnterpriseRoute: EnterpriseRoute,
+  EsimRoute: EsimRoute,
+  FaqRoute: FaqRoute,
+  PlannerRoute: PlannerRoute,
+  PocketWifiRoute: PocketWifiRoute,
+  PricingRoute: PricingRoute,
+  SupportRoute: SupportRoute,
+  TravelSimRoute: TravelSimRoute,
+  WhatIsEsimRoute: WhatIsEsimRoute,
+  DestinationsCountryRoute: DestinationsCountryRoute,
+  DestinationsIndexRoute: DestinationsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -11,23 +11,28 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Navbar } from "@/components/site/Navbar";
+import { Footer } from "@/components/site/Footer";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-aurora">Signal lost</p>
-        <h1 className="mt-4 font-display text-7xl font-bold tracking-tight text-foreground">404</h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          The route you're looking for isn't on our network.
-        </p>
-        <div className="mt-8">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-full bg-aurora px-6 py-3 text-sm font-semibold text-background transition-transform hover:scale-[1.02]"
-          >
-            Back to base
-          </Link>
+    <div className="min-h-dvh bg-background">
+      <Navbar />
+      <div className="flex min-h-dvh items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-amber">Signal lost</p>
+          <h1 className="mt-4 font-display text-7xl font-bold tracking-tight">404</h1>
+          <p className="mt-4 text-sm text-muted-foreground">
+            The route you're looking for isn't on our network.
+          </p>
+          <div className="mt-8">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-full bg-sunrise px-6 py-3 text-sm font-semibold text-white shadow-glow-amber transition-transform hover:scale-[1.02]"
+            >
+              Back to base
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -44,9 +49,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">This page didn't load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. Try again or head back home.
         </p>
@@ -56,14 +59,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-full bg-aurora px-5 py-2.5 text-sm font-semibold text-background transition-transform hover:scale-[1.02]"
+            className="inline-flex items-center justify-center rounded-full bg-sunrise px-5 py-2.5 text-sm font-semibold text-white shadow-glow-amber"
           >
             Try again
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-full border border-border bg-transparent px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
-          >
+          <a href="/" className="inline-flex items-center justify-center rounded-full border border-border px-5 py-2.5 text-sm font-medium">
             Go home
           </a>
         </div>
@@ -77,23 +77,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Air-Roam — Travel without losing connection" },
+      { title: "Air-Roam — Travel confidently. Stay connected anywhere." },
       {
         name: "description",
         content:
-          "Premium eSIM, travel SIM, and pocket WiFi for the modern explorer. Instant activation in 190+ countries with 5G speeds and zero roaming fees.",
+          "Premium eSIM, travel SIM, and pocket WiFi in 190+ countries. Instant activation, 5G speeds, zero roaming fees.",
       },
       { name: "author", content: "Air-Roam" },
-      { property: "og:title", content: "Air-Roam — Travel without losing connection" },
+      { property: "og:title", content: "Air-Roam — Travel confidently. Stay connected anywhere." },
       {
         property: "og:description",
         content:
-          "Instant global data for the modern traveler. eSIM, travel SIM & pocket WiFi in 190+ countries.",
+          "Instant global data for the modern traveler. DRET eSIM, Travel SIM & Air-Roam Pocket WiFi.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Air-Roam" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@AirRoam" },
-      { name: "theme-color", content: "#0a0a0f" },
+      { name: "theme-color", content: "#ffffff" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -131,7 +132,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="flex min-h-dvh flex-col bg-background text-foreground">
+        <Navbar />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </QueryClientProvider>
   );
 }
