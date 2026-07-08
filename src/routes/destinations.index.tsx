@@ -5,6 +5,8 @@ import { CountryCard } from "@/components/site/CountryCard";
 import { WorldMap } from "@/components/site/WorldMap";
 import { CTASection } from "@/components/site/CTASection";
 import { Search, Filter } from "lucide-react";
+import { startingFrom } from "@/domain/pricing";
+import { formatMoney } from "@/lib/format";
 
 export const Route = createFileRoute("/destinations/")({
   head: () => ({
@@ -62,7 +64,7 @@ function DestinationsIndex() {
               <Link key={c.slug} to="/destinations/$country" params={{ country: c.slug }} className="group rounded-2xl border border-border bg-card p-5 text-center shadow-card transition-all hover:-translate-y-1 hover:shadow-elevated">
                 <div className="text-3xl">{c.flag}</div>
                 <div className="mt-3 text-sm font-semibold group-hover:text-amber">{c.name}</div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">from ${c.fromPrice}/day</div>
+                <div className="mt-1 font-mono text-[10px] text-muted-foreground">{(() => { const f = startingFrom(c.slug); return f ? `from ${formatMoney(f)}` : "\u00a0"; })()}</div>
               </Link>
             ))}
           </div>

@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import type { Country } from "@/data/countries";
+import { startingFrom } from "@/domain/pricing";
+import { formatMoney } from "@/lib/format";
 import { ArrowUpRight } from "lucide-react";
 
 export function CountryCard({ c }: { c: Country }) {
+  const from = startingFrom(c.slug);
   return (
     <Link
       to="/destinations/$country"
@@ -21,8 +24,7 @@ export function CountryCard({ c }: { c: Country }) {
       <div className="mt-5 flex items-center justify-between border-t border-border pt-4 text-sm">
         <span className="text-muted-foreground">From</span>
         <span className="font-display font-bold text-foreground">
-          ${c.fromPrice.toFixed(2)}
-          <span className="text-xs font-medium text-muted-foreground"> /day</span>
+          {from ? formatMoney(from) : "—"}
         </span>
       </div>
     </Link>

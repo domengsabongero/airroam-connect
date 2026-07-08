@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { countries } from "@/data/countries";
 import { plans } from "@/data/plans";
+import { startingFrom } from "@/domain/pricing";
+import { formatMoney } from "@/lib/format";
 import { PricingCard } from "@/components/site/PricingCard";
 import { CTASection } from "@/components/site/CTASection";
 import { FAQAccordion } from "@/components/site/FAQAccordion";
@@ -47,9 +49,9 @@ function CountryPage() {
               <p className="mt-6 max-w-2xl text-lg text-muted-foreground">{c.tagline}</p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Starting at</div>
-              <div className="mt-1 font-display text-4xl font-bold text-amber">${c.fromPrice}</div>
-              <div className="text-xs text-muted-foreground">per day, all-in</div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Starting from</div>
+              <div className="mt-1 font-display text-4xl font-bold text-amber">{(() => { const f = startingFrom(c.slug); return f ? formatMoney(f) : "—"; })()}</div>
+              <div className="text-xs text-muted-foreground">lowest available plan</div>
             </div>
           </div>
         </div>
@@ -135,7 +137,7 @@ function CountryPage() {
               <Link key={r.slug} to="/destinations/$country" params={{ country: r.slug }} className="group rounded-2xl border border-border bg-card p-5 text-center shadow-card transition-all hover:-translate-y-1 hover:shadow-elevated">
                 <div className="text-3xl">{r.flag}</div>
                 <div className="mt-3 text-sm font-semibold group-hover:text-amber">{r.name}</div>
-                <div className="mt-1 font-mono text-[10px] text-muted-foreground">from ${r.fromPrice}/day</div>
+                <div className="mt-1 font-mono text-[10px] text-muted-foreground">{(() => { const f = startingFrom(r.slug); return f ? `from ${formatMoney(f)}` : "\u00a0"; })()}</div>
               </Link>
             ))}
           </div>
