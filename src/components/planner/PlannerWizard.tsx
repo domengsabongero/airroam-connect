@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { countries } from "@/data/countries";
-import { plans } from "@/data/plans";
+import { plans, formatData } from "@/data/plans";
+import { formatMoney } from "@/lib/format";
 import { ArrowRight, ArrowLeft, Check, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -10,7 +11,7 @@ type Answers = {
   country: string;
   days: number;
   travelers: number;
-  productPref: "any" | "esim" | "sim" | "wifi";
+  productPref: "any" | "esim" | "travel-sim" | "pocket-wifi";
   usage: "light" | "standard" | "heavy";
 };
 
@@ -23,17 +24,14 @@ export function PlannerWizard() {
   const totalSteps = 5;
 
   function recommend() {
-    // Filter by preference
     let candidates = plans.filter((p) => p.product !== "enterprise");
     if (a.productPref !== "any") candidates = candidates.filter((p) => p.product === a.productPref);
-    // Multi-traveler → prefer wifi
-    if (a.travelers >= 3 && a.productPref === "any") candidates = plans.filter((p) => p.product === "wifi");
-    // Sort by fit
-    const dataScore = a.usage === "light" ? 3 : a.usage === "standard" ? 10 : 30;
-    const scored = candidates.map((p) => ({
-      p,
-      score: Math.abs(p.days - a.days) + Math.abs(parseInt(p.data) || 100 - dataScore),
-    }));
+    if (a.travelers >= 3 && a.productPref === "any") candidates = plans.filter((p) => p.product === "pocket-wifi");
+    const dataScoreGB = a.usage === "light" ? 3 : a.usage === "standard" ? 10 : 30;
+    const scored = candidates.map((p) => {
+      const dataGB = p.dataMB === "unlimited" ? 100 : p.dataMB / 1024;
+      return { p, score: Math.abs(p.validityDays - a.days) + Math.abs(dataGB - dataScoreGB) };
+    });
     scored.sort((x, y) => x.score - y.score);
     return scored.slice(0, 3).map((s) => s.p);
   }
@@ -117,8 +115,8 @@ export function PlannerWizard() {
               {[
                 { id: "any" as const, name: "Let us recommend", desc: "We'll pick what fits" },
                 { id: "esim" as const, name: "DRET eSIM", desc: "Instant, no shipping" },
-                { id: "sim" as const, name: "Travel SIM", desc: "Physical card" },
-                { id: "wifi" as const, name: "Air-Roam Pocket WiFi", desc: "Best for groups" },
+                { id: "travel-sim" as const, name: "Travel SIM", desc: "Physical card" },
+                { id: "pocket-wifi" as const, name: "Air-Roam Pocket WiFi", desc: "Best for groups" },
               ].map((o) => (
                 <button key={o.id} onClick={() => setA({ ...a, productPref: o.id })} className={`rounded-2xl border-2 p-5 text-left transition-all ${a.productPref === o.id ? "border-amber bg-amber/5" : "border-border hover:border-amber/50"}`}>
                   <div className="font-semibold">{o.name}</div>
@@ -164,12 +162,12 @@ export function PlannerWizard() {
                 <div key={p.id} className={`rounded-2xl border p-5 ${i === 0 ? "border-amber bg-amber/5 shadow-glow-amber" : "border-border"}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-mono text-[10px] uppercase tracking-widest text-teal">{p.product === "esim" ? "DRET eSIM" : p.product === "wifi" ? "Air-Roam Pocket WiFi" : "Travel SIM"}</div>
-                      <div className="mt-1 font-display text-xl font-bold">{p.name} — {p.data}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">{p.days} days validity</div>
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-teal">{p.product === "esim" ? "DRET eSIM" : p.product === "pocket-wifi" ? "Air-Roam Pocket WiFi" : p.product === "travel-sim" ? "Travel SIM" : "Enterprise"}</div>
+                      <div className="mt-1 font-display text-xl font-bold">{p.name} — {formatData(p.dataMB)}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{p.validityDays} days validity</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-display text-2xl font-bold">${p.price}</div>
+                      <div className="font-display text-2xl font-bold">{formatMoney(p.basePrice)}</div>
                       {i === 0 && <div className="mt-1 rounded-full bg-amber px-2 py-0.5 text-[10px] font-semibold text-white">Best fit</div>}
                     </div>
                   </div>

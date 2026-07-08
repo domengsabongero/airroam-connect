@@ -24,7 +24,7 @@ const simFaqs = [
 ];
 
 function SimPage() {
-  const simPlans = plans.filter((p) => p.product === "sim");
+  const simPlans = plans.filter((p) => p.product === "travel-sim");
 
   return (
     <>

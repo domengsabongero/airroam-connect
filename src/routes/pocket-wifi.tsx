@@ -24,7 +24,7 @@ const wifiFaqs = [
 ];
 
 function WifiPage() {
-  const wifi = plans.filter((p) => p.product === "wifi");
+  const wifi = plans.filter((p) => p.product === "pocket-wifi");
 
   return (
     <>
