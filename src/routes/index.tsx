@@ -5,6 +5,7 @@ import { CountryCard } from "@/components/site/CountryCard";
 import { Testimonials } from "@/components/site/Testimonials";
 import { CTASection } from "@/components/site/CTASection";
 import { blogPosts } from "@/data/content";
+import { GlobeSection } from "@/components/site/GlobeSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -159,6 +160,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <GlobeSection />
 
       {/* AI ASSISTANT TEASER */}
       <section className="px-6 py-24">

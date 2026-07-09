@@ -8,6 +8,7 @@ import { CTASection } from "@/components/site/CTASection";
 import { FAQAccordion } from "@/components/site/FAQAccordion";
 import { generalFaqs } from "@/data/content";
 import { ArrowLeft, Signal, Clock, Coins, MapPin, Wifi, Smartphone, CreditCard } from "lucide-react";
+import { GlobeSlot } from "@/features/globe";
 
 export const Route = createFileRoute("/destinations/$country")({
   loader: ({ params }) => {
@@ -74,6 +75,46 @@ function CountryPage() {
           ))}
         </div>
       </section>
+
+      {/* Your Coverage Around the World */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-6xl">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Live coverage</p>
+          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Your coverage around the world
+          </h2>
+          <div className="relative mt-8 overflow-hidden rounded-[32px] border border-border bg-surface">
+            <div className="relative aspect-[16/10]">
+              <GlobeSlot variant="destination" interactive showControls showSearch autoRotate={false} />
+            </div>
+          </div>
+          <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Networks</dt>
+              <dd className="mt-1 text-sm font-semibold">{c.partnerNetworks.join(" · ")}</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Coverage</dt>
+              <dd className="mt-1 text-sm font-semibold capitalize">{c.coverage}</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">5G</dt>
+              <dd className="mt-1 text-sm font-semibold">{c.fiveG ? "Available" : "4G+ only"}</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Activation</dt>
+              <dd className="mt-1 text-sm font-semibold">{c.activation}</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Starting from</dt>
+              <dd className="mt-1 text-sm font-semibold text-amber">
+                {(() => { const f = startingFrom(c.slug); return f ? formatMoney(f) : "—"; })()}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
 
       {/* Available products */}
       <section className="px-6 py-16">

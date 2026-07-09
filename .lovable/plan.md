@@ -1,337 +1,143 @@
+## Goal
 
-# Air-Roam Globe Engine + Production-Grade Architecture
+Ship a production-quality, persistent 3D globe engine as Air-Roam's primary destination-discovery experience. One WebGL canvas mounted in `__root.tsx` renders across routes; homepage and destination pages each open a `<GlobeSlot>` that repositions the same scene. Fully replaces the static `WorldMap`/`GlobeSection` visuals with real lat/lng, PHP pricing derived from the pricing service, and a Sunrise-palette look.
 
-Replaces only the Globe module of the Air-Roam 4.0 roadmap. Everything previously approved stays. This revision folds in: R3F/Drei primary (react-globe.gl only if it clearly helps a specific feature), simplest viable state (Context + `useSyncExternalStore`, upgrade to Zustand only if store grows past a couple layers), and a pricing system built for real business growth.
+## Architecture
 
----
-
-## 1. Globe engine — R3F/Drei, modular, layer-based
-
-Built as a reusable engine. `react-globe.gl` is not a dependency of the engine. If a single feature (e.g. arc rendering) is materially simpler with it, we may adopt it inside one layer file behind the same layer interface — engine core stays independent and replaceable.
-
-```
+```text
 src/features/globe/
-  engine/
-    GlobeCanvas.tsx         <Canvas>, camera rig, OrbitControls, perf tier
-    GlobeScene.tsx          Renders enabled layers from registry, in order
-    layerRegistry.ts        LayerDef[]: { id, order, minTier, component }
-    cameraController.ts     Quaternion slerp + distance easing (maath)
-    coords.ts               latLngToVec3, greatCircle, bearing, centroid
-    perf.ts                 WebGL + tier (high/mid/low) + reduced-motion
-    fallback/SVGGlobe.tsx   Non-WebGL / SSR fallback, same store subscription
-  state/
-    globeStore.ts           useSyncExternalStore snapshot store (see §2)
-    GlobeProvider.tsx       Context wrapper, one instance per app
-    useGlobe.ts             Selector hook: useGlobe(s => s.selected)
+  index.ts                     # public API barrel
+  store.ts                     # useSyncExternalStore snapshot store
+  useGlobe.ts                  # useGlobe(selector) hook + actions
+  types.ts                     # LayerId, Mode, CameraTarget, Marker, GlobeStore
+  layer-registry.ts            # registerLayer/getLayers — extensible
+  performance.ts               # tiers (low/med/high) from GPU + prefers-reduced-motion
+  math/
+    latLngToVec3.ts            # (lat,lng,radius) -> Vector3, verified with test cases
+    greatCircle.ts             # slerp points along great-circle arc
+    easing.ts                  # cubic/expo easings for camera + arc
+  host/
+    GlobeHost.tsx              # persistent single <Canvas> in __root
+    GlobeSlot.tsx              # ResizeObserver-fed rect, variant, mode
+    GlobeCanvas.tsx            # <Canvas> wrapper (dpr cap, tone mapping, ACES)
+    GlobeScene.tsx             # lights, camera, controls, layer host
+    CameraController.tsx       # slerp target, easing, idle auto-rotate mgmt
   layers/
-    EarthLayer.tsx          Day/night textures, spec, bump, subtle terrain
-    AtmosphereLayer.tsx     Fresnel rim glow
-    CloudsLayer.tsx         Slow-drift transparent sphere (high tier only)
-    CountryMarkersLayer.tsx Data-driven from countries dataset
-    FlightArcLayer.tsx      Animated great-circle arc, gradient trail
-    OriginPinLayer.tsx      Manila (or user origin) beacon
-    // Interface-locked stubs, disabled by default:
-    CoverageHeatmapLayer.tsx
-    SatellitesLayer.tsx
-    AirportsLayer.tsx
-    WeatherLayer.tsx
-    LiveActivityLayer.tsx
-    CarrierOverlayLayer.tsx
+    EarthLayer.tsx             # sphere, day texture, normal/bump, specular
+    AtmosphereLayer.tsx        # Fresnel shader shell
+    CloudsLayer.tsx            # slow-drifting transparent cloud sphere
+    CountryMarkersLayer.tsx    # glowing pins from countries dataset
+    FlightArcLayer.tsx         # Manila → target, animated dashOffset
+    OriginPinLayer.tsx         # Manila anchor
   ui/
-    GlobeSearch.tsx         Fuzzy country search → camera fly
-    GlobeTooltip.tsx        Drei <Html> hover card
-    GlobeLegend.tsx         Marker style legend
-    GlobeControls.tsx       Reset · autorotate · dev layer toggles
-  GlobeHost.tsx             Portal host (see §3)
-  GlobeSlot.tsx             Per-page sized placeholder
-  types.ts                  All engine types (LayerDef, GlobeMode, CameraTarget)
+    GlobeSearch.tsx            # fuzzy country search, keyboard nav
+    GlobeTooltip.tsx           # hover/selected card, HTML overlay
+    GlobeControls.tsx          # Reset View, zoom hint, a11y buttons
+  fallback/
+    SVGGlobe.tsx               # orthographic SVG (no WebGL) fallback
+  textures/
+    (loaded via drei useTexture from /public/globe/*)
 ```
 
-Each layer is a self-contained R3F component reading from the store and rendering into the shared scene. Adding a layer = one file + one registry entry, no engine edits. The five future-layer stubs ship with correct props/interfaces so file locations, imports, and types are locked in.
+Layer components read from the store; the layer registry lets future overlays (satellites, weather, coverage heatmap) drop in without touching `GlobeScene`.
 
-## 2. State: simplest viable — Context + `useSyncExternalStore`
+## State (single source of truth)
 
-No new dependency. Snapshot store with selector hook = same DX as Zustand for the read paths we need, without adding a runtime dep. If the store grows past ~6 slices or we need middleware, we swap the internals to Zustand behind the same `useGlobe(selector)` API without touching consumers.
+`useSyncExternalStore`-backed snapshot store (no new deps). Slices:
 
-```ts
-// src/features/globe/state/globeStore.ts
-type GlobeState = {
-  selectedSlug: string | null;
-  origin: { slug: string; lat: number; lng: number };
-  hoveredSlug: string | null;
-  cameraTarget: CameraTarget | null;
-  mode: 'hero' | 'destination' | 'region' | 'explore';
-  layers: Record<LayerId, boolean>;
-};
-type GlobeActions = {
-  setSelected(slug: string | null): void;
-  setHovered(slug: string | null): void;
-  setOrigin(o: GlobeState['origin']): void;
-  setMode(m: GlobeState['mode']): void;
-  toggleLayer(id: LayerId, on?: boolean): void;
-};
-// Snapshot store implemented with a Set<Listener> + getSnapshot; exposes:
-export const globeStore: { subscribe; getSnapshot; actions: GlobeActions };
-export function useGlobe<T>(selector: (s: GlobeState) => T): T; // uSES + Object.is equality
-```
+- `selectedSlug`, `hoveredSlug`
+- `origin` (Manila, `14.5995, 120.9842`)
+- `cameraTarget: { lat, lng, distance }`
+- `mode: "auto-rotate" | "idle" | "interacting" | "focus"`
+- `arc: { fromSlug, toSlug, progress } | null`
+- `layers: Record<LayerId, boolean>`
+- `interactionAt: number` (ms) — for idle-resume auto-rotate
 
-`GlobeProvider` mounts once in `__root.tsx`. There is exactly one store instance for the whole app.
+Actions: `select(slug)`, `hover(slug)`, `flyTo(slug)`, `resetView()`, `setMode(...)`, `noteInteraction()`, `toggleLayer(id)`. When `flyTo` runs it sets `cameraTarget`, starts the arc, sets `mode="focus"`, calls navigate on the destination route (destination page reads `selectedSlug` from URL param on mount so state survives reload).
 
-## 3. Persistent globe across routes
+If the store grows past ~6 slices we swap internals to Zustand behind the same `useGlobe(selector)` API — no callers change.
 
-The globe is mounted **once**, above the route tree, and rehomed into per-page slots via React Portal so React state, WebGL context, and camera continuity survive route changes.
+## Persistent host in `__root.tsx`
 
-- `GlobeHost` in `__root.tsx` renders `<Canvas>` once (fixed-positioned, initially hidden).
-- Each consuming page renders `<GlobeSlot variant="hero" | "destination" | "region" | "explore" activeSlug?>` — a sized placeholder with a `ResizeObserver`; the host absolute-positions the canvas to the slot's rect on each frame the slot moves.
-- Route change → `globeStore.actions.setSelected(slug)` → `cameraController.flyTo(...)` → arc updates. No teardown, no re-init.
-- Reduced motion / low tier: cross-fade or jump-cut instead of camera flight.
-- WebGL absent or context lost → host renders `SVGGlobe` fallback, same store subscription. Consumers don't branch.
+- Mount `<GlobeHost />` once, absolutely positioned, `pointer-events: none` by default. It computes a target rect from the currently active `<GlobeSlot>` via `ResizeObserver` and translates/scales its canvas to that rect. Pointer events flip on only when a slot is mounted and visible.
+- Slots declare `variant: "hero" | "destination" | "explore"`, `interactive: boolean`, `showControls`, `showSearch`. Homepage variant hides controls + search and locks to slow auto-rotate.
+- On route change the canvas doesn't unmount — camera state, textures, and materials persist. Destination page mount triggers `flyTo(params.country)` which slerps camera + animates arc.
 
-Signature interaction:
+## Cinematic Earth (visual quality)
 
-```text
-Search "Japan" (GlobeSearch or ⌘K palette)
-  → setSelected('japan')
-  → camera slerps to Japan (~600ms easeInOutCubic)
-  → FlightArcLayer animates Manila → Tokyo (~900ms)
-  → Japan marker begins continuous pulse
-  → Tooltip: networks, from ₱, activation, coverage
-  → After arc + 250ms: router.navigate('/destinations/japan')
-  → Destination page mounts; GlobeSlot claims same canvas; camera stays
-```
+- Sphere at radius 1. PBR-style material using Earth textures at `public/globe/`:
+  - `earth-day-2k.jpg` (albedo)
+  - `earth-normal-2k.jpg` (subtle terrain relief)
+  - `earth-specular-2k.jpg` (ocean-only specular mask)
+  - `earth-clouds-2k.png` (alpha)
+  Textures are lazy-loaded via `drei` `useTexture` + Suspense; boundary shows a soft skeleton disk while loading. Sizes chosen so total globe payload is <500KB gzipped.
+- Atmosphere: additive Fresnel shader shell at 1.03× radius using amber→sky gradient from Sunrise tokens.
+- Clouds: 1.005× radius sphere with alpha map, rotates at 0.02 rad/s independent of Earth.
+- Lighting: 1 hemisphere + 1 directional key (warm amber) + rim light (cool sky). Tone mapping ACES, exposure ~0.9. dpr capped at `[1, 2]`.
+- Markers: instanced glow discs on the surface. Selected marker uses `EffectComposer`-free bloom via additive sprite (keeps bundle small). Colors: default `--teal`, popular `--amber`, selected `--amber` with pulsing ring.
+- Flight arc: sampled great-circle points, `LineDashedMaterial` with animated `dashOffset`, plus a leading glow sprite. Origin/destination markers pulse when arc completes.
 
-Traditional search, main nav, and destination grid all remain fully supported; the globe is one of several first-class discovery paths.
+## Marker accuracy
 
-## 4. Pricing system — production-grade, PHP-primary, growth-ready
+`latLngToVec3(lat, lng, r=1)` uses the standard conversion (longitude offset 0° = prime meridian on +Z, east positive). Verify with the required set: Philippines (Manila 14.5995, 120.9842), Japan (Tokyo 35.68, 139.65), South Korea (Seoul 37.57, 126.98), Singapore (1.35, 103.82), Australia (Canberra −35.28, 149.13), Canada (Ottawa 45.42, −75.70), Brazil (Brasília −15.80, −47.89), Iceland (Reykjavík 64.15, −21.94 — add to `countries.ts` if missing), New Zealand (Wellington −41.29, 174.78). All coords come from `countries.ts`; no offsets embedded in the layer.
 
-USD is removed. Prices originate from one canonical dataset and are computed at read time. Designed for the exact list of future needs: country plans, regional plans, promos, seasonal campaigns, discount codes, reseller pricing, B2B/enterprise pricing, multi-currency.
+## Interaction
 
-### Data shapes (Supabase-schema-compatible)
+- `OrbitControls` (drei) with damping 0.08, `enablePan=false`, min/max distance clamped to `[1.6, 4]`, `enableZoom=true` on interactive slots.
+- Auto-rotate at 0.15 rad/s when `mode==="auto-rotate"`. Any pointer/wheel/key event calls `noteInteraction()`, sets `mode="interacting"`; after 4s of idle the controller returns to auto-rotate (or `focus` if a destination is selected).
+- Fuzzy country search (lightweight scorer over `name + capital + region`) with keyboard nav; `Enter` triggers `flyTo`.
+- Hover raycast on markers → `GlobeTooltip` HTML overlay (fixed to marker screen-projection) shows `{ flag, name, network, coverage, startingFrom }`.
+- Click marker → `flyTo(slug)`, animate arc Manila → target, then `navigate({ to: "/destinations/$country", params: { country: slug } })` after arc peak.
+- `GlobeControls` provides a "Reset View" button that clears selection, returns camera to a wide neutral pose, and re-enables auto-rotate.
+- Respect `prefers-reduced-motion`: disable auto-rotate, drop arc animation to a static line, use instant camera cuts, disable cloud drift.
 
-```ts
-// src/domain/pricing/types.ts
-export type Product = 'esim' | 'travel-sim' | 'pocket-wifi' | 'enterprise';
-export type CurrencyCode = 'PHP' | 'USD' | 'EUR' | 'JPY' | 'SGD'; // extensible
-export type Money = { amountMinor: number; currency: CurrencyCode }; // integer minor units
+## Performance & fallback
 
-export type PlanScope =
-  | { kind: 'country'; slug: string }
-  | { kind: 'region'; slug: string };            // e.g. 'europe', 'southeast-asia'
+- `performance.ts` classifies device tier from `navigator.hardwareConcurrency`, `devicePixelRatio`, and a WebGL2 feature probe. Tiers gate cloud layer, normal map, and dpr cap.
+- `<GlobeHost>` uses `<Suspense>` + code-split via dynamic import (`React.lazy`) inside a client-only guard; SSR renders nothing for the WebGL canvas and instead reserves layout with a CSS-only placeholder (`bg-sky-soft`) so LCP isn't blocked.
+- Frameloop: `demand` on non-interactive homepage slot when no animation is running; `always` while auto-rotating, dragging, or arc animating.
+- WebGL absent, context-lost, or low-tier → render `<SVGGlobe />` fallback (equirectangular projection with the same markers, hover tooltip, and click-to-navigate).
+- Textures: 2K max, `THREE.SRGBColorSpace`, `anisotropy=4`, disposed on `<GlobeHost>` unmount (never happens in practice — one-shot).
+- Bundle: three/drei live only in the lazy chunk; the initial route payload is unaffected.
 
-export type CustomerTier = 'retail' | 'reseller' | 'b2b' | 'enterprise';
+## Integration
 
-export type Plan = {
-  id: string;
-  product: Product;
-  scope: PlanScope;
-  name: string;
-  dataMB: number | 'unlimited';
-  validityDays: number;
-  basePrice: Money;                              // canonical price (PHP by default)
-  tierPrices?: Partial<Record<CustomerTier, Money>>; // reseller / B2B / enterprise
-  features: string[];
-  active: boolean;
-  visibility: 'public' | 'unlisted' | 'internal';
-};
+- Homepage: replace `GlobeSection.tsx` body (keep section shell + copy) with `<GlobeSlot variant="hero" interactive={false} showControls={false} showSearch={false} />`. Homepage uses auto-rotate + hero copy; traditional destination cards, region search, and menus remain unchanged below.
+- Destination page: replace `WorldMap` usage on `destinations.$country.tsx` (there isn't a direct one there, but the current "World Coverage" strip is implicit — we add the new section) with a new section titled **"Your Coverage Around the World"** containing `<GlobeSlot variant="destination" interactive showControls showSearch />`. Below the globe, a facts strip driven entirely by the pricing service and `countries.ts`:
+  - Supported Networks: `c.partnerNetworks.join(" · ")`
+  - Coverage: `c.coverage` humanized
+  - 5G: `c.fiveG ? "Available" : "4G+ only"`
+  - Activation: `c.activation`
+  - Starting From: `formatMoney(startingFrom(c.slug))` — never hardcoded.
+- `destinations.index.tsx`: replace the `WorldMap` block with `<GlobeSlot variant="explore" interactive showControls showSearch />` sized 16:9.
+- Delete `src/components/site/WorldMap.tsx` after all callers migrate. Keep `GlobeSection.tsx` as a thin wrapper around `<GlobeSlot variant="hero" …>` for now, so its section copy stays intact.
+- No changes to pricing domain, plans data, or MCP tools.
 
-export type Promotion = {
-  id: string;
-  name: string;
-  kind: 'percent' | 'amount' | 'override';
-  value: number;                                 // 15 = 15% or 15 minor units for 'amount'
-  overridePrice?: Money;                         // required when kind === 'override'
-  appliesTo:                                     // any subset; ANDed together
-    { productIds?: Product[]; planIds?: string[];
-      countrySlugs?: string[]; regionSlugs?: string[];
-      tiers?: CustomerTier[] };
-  window: { startsAt: string; endsAt: string };  // ISO; seasonal campaigns
-  stackable: boolean;
-  priority: number;                              // higher wins when non-stackable
-  active: boolean;
-};
+## Accessibility
 
-export type DiscountCode = {
-  code: string;
-  promotionId: string;                           // resolves to a Promotion
-  maxRedemptions?: number;
-  perCustomerLimit?: number;
-  requiresAuth?: boolean;
-  active: boolean;
-};
+- Every marker has an off-screen `aria-label` in an `<ul>` companion list (search results). Keyboard users can Tab to a marker button, press Enter to fly.
+- `GlobeSearch` implements listbox pattern (roving `aria-activedescendant`).
+- Reduced motion honored globally (media query + store flag).
+- Text alternatives: destination facts strip is fully semantic HTML — the globe is decorative-plus-interactive, not the only path.
 
-export type FxRate = { from: CurrencyCode; to: CurrencyCode; rate: number; asOf: string };
-```
+## Out of scope
 
-### Canonical read layer
+- Real coverage polygons, satellite overlays, live-flight, weather, and multi-currency runtime toggle (stubs are in the layer registry only).
+- Auth, checkout, MCP additions.
+- New pricing rules — the service is unchanged.
 
-```ts
-// src/domain/pricing/repository.ts   (data-source seam — swaps to Supabase later)
-export interface PricingRepository {
-  listPlans(): Promise<Plan[]>;
-  listPromotions(now?: Date): Promise<Promotion[]>;
-  getDiscountCode(code: string): Promise<DiscountCode | null>;
-  listFxRates(): Promise<FxRate[]>;
-}
-// Ship with StaticPricingRepository backed by src/data/plans.ts + promotions.ts.
+## Files
 
-// src/domain/pricing/service.ts   (pure, memoized)
-plansForCountry(slug)               // country plans ∪ region plans covering slug, active + visible
-plansByProduct(slug, product)
-applicablePromotions(plan, ctx)     // ctx: { now, countrySlug, tier, code? }
-priceFor(plan, ctx)                 // returns { base, final, appliedPromotions[] } in plan.basePrice.currency
-startingFrom(slug, ctx)             // min(priceFor(...).final) across plansForCountry(slug)
-convert(money, targetCurrency, rates)
-formatMoney(money, locale='en-PH')  // Intl.NumberFormat; PHP has 0 fraction digits by convention
-```
+**New (~24):** `src/features/globe/**` per the tree above; `public/globe/earth-day-2k.jpg`, `earth-normal-2k.jpg`, `earth-specular-2k.jpg`, `earth-clouds-2k.png` (sourced from public-domain NASA Blue Marble / equivalent, downsampled to 2K).
 
-Every price render (cards, tooltips, info strips, hero, planner, assistant, comparison table) calls `startingFrom`/`priceFor` + `formatMoney`. No hardcoded numbers in components. Grep audit at end: zero `$`, `USD`, `fromPrice`, `.toFixed(2)` remaining in UI code.
+**Edited:** `src/routes/__root.tsx` (mount `<GlobeHost />`), `src/routes/index.tsx` (Hero slot), `src/routes/destinations.index.tsx` (Explore slot), `src/routes/destinations.$country.tsx` (Destination slot + facts strip), `src/components/site/GlobeSection.tsx` (thin wrapper), `src/data/countries.ts` (add Iceland row if missing so verification set is complete).
 
-### Currency policy
+**Removed:** `src/components/site/WorldMap.tsx` (once no route imports it).
 
-- PHP is the primary currency and the default display currency.
-- `Money` is currency-tagged everywhere; formatting is a leaf concern.
-- Multi-currency display is a runtime toggle later: add an `FxRate[]` source and a currency preference in a future `useCurrency()` hook; `convert()` is already there. Nothing else changes.
+## Acceptance checks
 
-### Promotions & campaigns
-
-- Seasonal campaigns are just `Promotion` rows with a `window`.
-- Discount codes resolve to a promotion at redemption time; UI shows the same `priceFor` output with code applied.
-- Non-stackable conflicts resolved by `priority`.
-- Reseller / B2B / enterprise pricing use either `Plan.tierPrices[tier]` (canonical tier price) or a `Promotion` scoped to `tiers`. Both paths pass through `priceFor` — call sites don't branch on tier.
-
-### Migration path
-
-`StaticPricingRepository` → `SupabasePricingRepository` is a one-file swap; service and UI don't change. Same shapes map 1:1 to future Supabase tables: `plans`, `promotions`, `discount_codes`, `fx_rates`, `plan_tier_prices`. Stripe-side pricing later maps `Plan.id` ↔ `stripe_price_id` via a join table without touching display code.
-
-## 5. Country pages — "Your Coverage Around the World"
-
-Replaces the static SVG map on `destinations.$country.tsx`. Renders `<GlobeSlot variant="destination" activeSlug={c.slug} />` plus an info strip driven entirely by data:
-
-```
-Supported Networks · 5G · Starting From ₱XXX · Activation · Coverage
-```
-
-All strings and prices sourced from country + plans data via the pricing service. No hardcoded copy.
-
-## 6. Data-driven everything
-
-Nothing about a country, region, product, plan, network, tip, attraction, FAQ, or recommendation is hardcoded in a component.
-
-```
-src/data/
-  countries.ts        Country[]  (lat, lng, coverage, networks, activation, supportedProducts, tips, attractions, faqs)
-  regions.ts          Region[]
-  products.ts         Product metadata (icon key, storytelling copy, spec rows)
-  plans.ts            Plan[]     (country + region scopes)
-  promotions.ts       Promotion[]
-  networks.ts         Carrier metadata
-  fx-rates.ts         FxRate[]   (empty initially; PHP-only)
-  faqs.ts             FAQ[] scoped by (global | country | product)
-  recommendations.ts  Assistant rule matrix
-```
-
-Every dataset has stable `id`/`slug`. No computed/duplicated fields stored. Country records drop `fromPrice`; "starting from" is always computed.
-
-## 7. Architecture & typing standards
-
-Production-SaaS boundaries. Nothing in components imports from another component's private helpers.
-
-```
-src/
-  domain/           Business logic, pure, framework-free, unit-testable
-    pricing/{types,service,repository,static-repository}.ts
-    recommend/{types,rules,service}.ts
-    wishlist/{types,service}.ts
-    recent/{types,service}.ts
-  data/             Static datasets (repository backing)
-  features/         Feature-scoped UI + state (globe, planner, assistant, wishlist)
-  components/       Cross-feature presentational components (Buttons, Cards, PricingCard)
-  routes/           TanStack routes; loaders call domain services only
-  lib/              Framework glue (formatMoney, cn, seo helpers)
-  integrations/     Future: supabase, stripe (thin adapters implementing repository ports)
-```
-
-TypeScript posture:
-
-- `tsconfig` strict on (already). Add `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` where feasible.
-- Public domain types exported via `index.ts` per folder; UI imports types, never internals.
-- Money is `Money`, never `number`. IDs are branded strings where they cross module boundaries (`CountrySlug`, `PlanId`) to catch mix-ups at compile time.
-- No `any`, no `as` casts against inferred router types (per TanStack type-safety guidance).
-
-## 8. AI Travel Assistant
-
-Unchanged from prior approval. Consumes `pricing/service` and `countries` — no duplicated prices. Recommendation includes: Best Product · Best Plan · Estimated Cost (₱) · Estimated Data · Coverage Quality · Add-ons · Activation Guide · Local Advice · Backup Option. Rules in `domain/recommend/rules.ts`.
-
-## 9. Product pages
-
-Apple-style storytelling preserved. Pricing cards read from `plans` filtered by product, show ₱ price, duration, data, features, primary CTA. `promotions.ts` may decorate cards with campaign badges via `priceFor`.
-
-## 10. Performance
-
-- Dynamic `import()` of `@react-three/fiber` + Drei behind `Suspense`; SSR renders `SVGGlobe`, `build:dev` prerender passes.
-- `dpr={[1, Math.min(devicePixelRatio, 2)]}`, `frameloop="demand"`, `invalidate()` on interaction/animation only.
-- Perf tiers: high → clouds + shader atmosphere; mid → no clouds, cheap Fresnel; low → static earth.
-- `prefers-reduced-motion`: no rotation, jump-cut camera, static arc.
-- Route-level code splitting: globe engine chunk isolated; only `GlobeHost` imports it.
-- Texture budget ≤ ~2.5 MB (KTX2/Basis when available), `loading="lazy"`.
-- Pricing service memoized per (countrySlug, tier, now-bucket) to keep list renders cheap.
-
-## 11. Media
-
-Unsplash/Pexels placeholders only. Image URLs are data fields on `Country`/`Region`/`Product`; branded photography swaps in without touching components.
-
-## 12. Long-term scalability
-
-- 190+ destinations: countries lazy-imported per region for region pages; markers layer virtualizes off-camera markers > ~60.
-- i18n: all display strings routed through a stub `t()` from `src/i18n/en.ts`; adding a locale = adding a file.
-- Supabase: `StaticPricingRepository` → `SupabasePricingRepository`; same for `countries`, `regions`, `promotions`.
-- Stripe: prices stay in our system; Stripe holds `stripe_price_id` per `Plan.id`. Enable Lovable's Stripe integration when we're ready to accept payments — no UI changes needed on that day.
-- Live carrier/coverage APIs: repository ports already async; UI already Suspense-based.
-- Wishlist / Recently viewed: `domain/wishlist` and `domain/recent` behind repository ports (LocalStorage today, Supabase later).
-
-## 13. Design philosophy
-
-Optimize equally for conversion, trust, performance, a11y, maintainability, scalability, UX. Every globe interaction resolves to a purchase-oriented payoff (starting ₱, activation, coverage → destination page → Buy). Focusable markers, aria-labels, visually-hidden crawlable link list, AA contrast, reduced-motion respected.
-
----
-
-## Technical notes
-
-- Deps to add: `three`, `@react-three/fiber`, `@react-three/drei`, `three-stdlib`, `maath`. No `react-globe.gl`, no `zustand` (we use `useSyncExternalStore`); reconsider only if state needs grow.
-- Single `<Canvas>` in `__root.tsx`; slot rects fed via `ResizeObserver`.
-- Camera framing per country from `lat/lng` + fixed altitude; region pages frame by centroid.
-- Earth texture rotated on Y so 0° meridian aligns; spot-check Japan/Australia/Brazil/Canada/Philippines/Iceland/NZ.
-- `formatMoney({amountMinor,currency:'PHP'})` → `Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0}).format(amountMinor/100)`.
-
-### File map (new / edit)
-
-```text
-new  src/features/globe/**                       (engine, state, layers, ui — ~18 files)
-new  src/domain/pricing/{types,service,repository,static-repository,index}.ts
-new  src/domain/recommend/{types,rules,service,index}.ts
-new  src/domain/wishlist/{types,service,index}.ts
-new  src/domain/recent/{types,service,index}.ts
-new  src/data/regions.ts
-new  src/data/products.ts
-new  src/data/promotions.ts
-new  src/data/networks.ts
-new  src/data/fx-rates.ts
-new  src/data/recommendations.ts
-new  src/lib/format.ts                           (formatMoney, formatDate)
-new  src/i18n/en.ts                              (t() stub)
-edit src/data/countries.ts                       (lat, lng, coverage, networks, activation, supportedProducts; remove fromPrice)
-edit src/data/plans.ts                           (Plan[] with scope + Money; remove USD)
-edit src/routes/__root.tsx                       (GlobeProvider + GlobeHost)
-edit src/routes/index.tsx                        (<GlobeSlot variant="hero" />)
-edit src/routes/destinations.$country.tsx        (<GlobeSlot variant="destination" />; info strip from data)
-edit src/routes/destinations.index.tsx           (<GlobeSlot variant="explore" />)
-edit src/components/site/CountryCard.tsx         (startingFrom + formatMoney)
-edit src/components/site/PricingCard.tsx         (Money; promo badges)
-edit src/components/site/GlobeSection.tsx        (thin wrapper → GlobeSlot hero)
-edit src/components/site/WorldMap.tsx            (thin wrapper → GlobeSlot; or delete)
-edit anywhere `$`, `fromPrice`, `.toFixed(2)`    (audit + replace)
-edit tsconfig.json                               (noUncheckedIndexedAccess, exactOptionalPropertyTypes)
-```
-
-### Out of scope this pass
-Real coverage polygons, satellite ephemerides, live-flight ingestion, weather API, real carrier inventory, auth/checkout/Stripe wiring, additional locales beyond the English stub, non-PHP display currencies at runtime. All architected for; interfaces and stubs are the deliverable.
+1. Navigate `/` → `/destinations/japan`: single WebGL context in DevTools Memory tab; camera slerps from world view to Tokyo; Manila→Tokyo arc animates once; destination page mounts with Japan marker highlighted.
+2. Verification set of 9 countries all sit visually over their real capitals when the globe is rotated to face them.
+3. `prefers-reduced-motion: reduce` disables auto-rotate, cloud drift, and arc animation.
+4. Disabling WebGL in DevTools → `<SVGGlobe />` renders on both homepage and destination pages, click still navigates.
+5. Lighthouse mobile performance on `/` ≥ 90 (globe deferred, not blocking LCP).
