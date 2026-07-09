@@ -35,7 +35,6 @@ export function CameraController({ controls }: Props) {
   }, [target, camera, reduced]);
 
   useFrame(() => {
-    // Resume auto-rotate after 4s idle
     if (mode === "interacting" && performance.now() - interactionAt > 4000) {
       const snap = getSnapshot();
       globeActions.setMode(snap.selectedSlug ? "focus" : "auto-rotate");
@@ -53,10 +52,4 @@ export function CameraController({ controls }: Props) {
   });
 
   return null;
-}
-
-// small helper to grab a fresh snapshot inside useFrame without a re-render
-import { getSnapshot } from "../store";
-function useGlobeSnapshot() {
-  return getSnapshot();
 }
