@@ -5,7 +5,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { latLngToCameraPos } from "../math/latLngToVec3";
 import { easeInOutCubic, clamp01 } from "../math/easing";
 import { useGlobe } from "../useGlobe";
-import { globeActions } from "../store";
+import { getSnapshot, globeActions } from "../store";
 
 type Props = { controls: React.RefObject<OrbitControlsImpl | null> };
 
@@ -37,10 +37,7 @@ export function CameraController({ controls }: Props) {
   useFrame(() => {
     // Resume auto-rotate after 4s idle
     if (mode === "interacting" && performance.now() - interactionAt > 4000) {
-      const nextMode = useGlobe.length; // no-op, silence lint
-      void nextMode;
-      // if a destination is focused, keep focus mode; otherwise auto-rotate
-      const snap = useGlobeSnapshot();
+      const snap = getSnapshot();
       globeActions.setMode(snap.selectedSlug ? "focus" : "auto-rotate");
     }
 
