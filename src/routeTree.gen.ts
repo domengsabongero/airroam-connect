@@ -15,6 +15,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PocketWifiRouteImport } from './routes/pocket-wifi'
 import { Route as PlannerRouteImport } from './routes/planner'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EsimRouteImport } from './routes/esim'
 import { Route as EnterpriseRouteImport } from './routes/enterprise'
@@ -25,6 +26,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DestinationsIndexRouteImport } from './routes/destinations.index'
 import { Route as DestinationsCountryRouteImport } from './routes/destinations.$country'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const WhatIsEsimRoute = WhatIsEsimRouteImport.update({
   id: '/what-is-esim',
@@ -54,6 +58,11 @@ const PocketWifiRoute = PocketWifiRouteImport.update({
 const PlannerRoute = PlannerRouteImport.update({
   id: '/planner',
   path: '/planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -106,6 +115,24 @@ const DestinationsCountryRoute = DestinationsCountryRouteImport.update({
   path: '/destinations/$country',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,14 +143,18 @@ export interface FileRoutesByFullPath {
   '/enterprise': typeof EnterpriseRoute
   '/esim': typeof EsimRoute
   '/faq': typeof FaqRoute
+  '/mcp': typeof McpRoute
   '/planner': typeof PlannerRoute
   '/pocket-wifi': typeof PocketWifiRoute
   '/pricing': typeof PricingRoute
   '/support': typeof SupportRoute
   '/travel-sim': typeof TravelSimRoute
   '/what-is-esim': typeof WhatIsEsimRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/destinations/$country': typeof DestinationsCountryRoute
   '/destinations/': typeof DestinationsIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,14 +165,18 @@ export interface FileRoutesByTo {
   '/enterprise': typeof EnterpriseRoute
   '/esim': typeof EsimRoute
   '/faq': typeof FaqRoute
+  '/mcp': typeof McpRoute
   '/planner': typeof PlannerRoute
   '/pocket-wifi': typeof PocketWifiRoute
   '/pricing': typeof PricingRoute
   '/support': typeof SupportRoute
   '/travel-sim': typeof TravelSimRoute
   '/what-is-esim': typeof WhatIsEsimRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/destinations/$country': typeof DestinationsCountryRoute
   '/destinations': typeof DestinationsIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,14 +188,18 @@ export interface FileRoutesById {
   '/enterprise': typeof EnterpriseRoute
   '/esim': typeof EsimRoute
   '/faq': typeof FaqRoute
+  '/mcp': typeof McpRoute
   '/planner': typeof PlannerRoute
   '/pocket-wifi': typeof PocketWifiRoute
   '/pricing': typeof PricingRoute
   '/support': typeof SupportRoute
   '/travel-sim': typeof TravelSimRoute
   '/what-is-esim': typeof WhatIsEsimRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/destinations/$country': typeof DestinationsCountryRoute
   '/destinations/': typeof DestinationsIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,14 +212,18 @@ export interface FileRouteTypes {
     | '/enterprise'
     | '/esim'
     | '/faq'
+    | '/mcp'
     | '/planner'
     | '/pocket-wifi'
     | '/pricing'
     | '/support'
     | '/travel-sim'
     | '/what-is-esim'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/destinations/$country'
     | '/destinations/'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -191,14 +234,18 @@ export interface FileRouteTypes {
     | '/enterprise'
     | '/esim'
     | '/faq'
+    | '/mcp'
     | '/planner'
     | '/pocket-wifi'
     | '/pricing'
     | '/support'
     | '/travel-sim'
     | '/what-is-esim'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/destinations/$country'
     | '/destinations'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
@@ -209,14 +256,18 @@ export interface FileRouteTypes {
     | '/enterprise'
     | '/esim'
     | '/faq'
+    | '/mcp'
     | '/planner'
     | '/pocket-wifi'
     | '/pricing'
     | '/support'
     | '/travel-sim'
     | '/what-is-esim'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/destinations/$country'
     | '/destinations/'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,14 +279,18 @@ export interface RootRouteChildren {
   EnterpriseRoute: typeof EnterpriseRoute
   EsimRoute: typeof EsimRoute
   FaqRoute: typeof FaqRoute
+  McpRoute: typeof McpRoute
   PlannerRoute: typeof PlannerRoute
   PocketWifiRoute: typeof PocketWifiRoute
   PricingRoute: typeof PricingRoute
   SupportRoute: typeof SupportRoute
   TravelSimRoute: typeof TravelSimRoute
   WhatIsEsimRoute: typeof WhatIsEsimRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DestinationsCountryRoute: typeof DestinationsCountryRoute
   DestinationsIndexRoute: typeof DestinationsIndexRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -280,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/planner'
       fullPath: '/planner'
       preLoaderRoute: typeof PlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -352,6 +414,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestinationsCountryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -364,14 +447,19 @@ const rootRouteChildren: RootRouteChildren = {
   EnterpriseRoute: EnterpriseRoute,
   EsimRoute: EsimRoute,
   FaqRoute: FaqRoute,
+  McpRoute: McpRoute,
   PlannerRoute: PlannerRoute,
   PocketWifiRoute: PocketWifiRoute,
   PricingRoute: PricingRoute,
   SupportRoute: SupportRoute,
   TravelSimRoute: TravelSimRoute,
   WhatIsEsimRoute: WhatIsEsimRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DestinationsCountryRoute: DestinationsCountryRoute,
   DestinationsIndexRoute: DestinationsIndexRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

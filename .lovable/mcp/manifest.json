@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "air-roam-mcp",
+      "version": "0.1.0",
+      "title": "Air-Roam"
+    },
+    "tools": [
+      {
+        "name": "list_destinations",
+        "title": "List destinations",
+        "description": "List Air-Roam supported destinations with region, capital, network tech, coverage and starting price in PHP. Optionally filter by region slug.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "region": {
+              "description": "Optional region slug filter.",
+              "type": "string",
+              "enum": [
+                "europe",
+                "asia-pacific",
+                "americas",
+                "middle-east",
+                "africa",
+                "oceania"
+              ]
+            },
+            "popularOnly": {
+              "description": "Return only popular destinations.",
+              "type": "boolean"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_destination",
+        "title": "Get destination details",
+        "description": "Get full details for one destination by slug — coordinates, partner networks, coverage, travel tips, and every applicable plan with final PHP pricing.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Country slug, e.g. 'japan' or 'south-korea'."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_plans",
+        "title": "List plans",
+        "description": "List Air-Roam connectivity plans (eSIM, travel SIM, pocket WiFi, enterprise) with PHP pricing. Optionally filter by product.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "product": {
+              "description": "Optional product filter.",
+              "type": "string",
+              "enum": [
+                "esim",
+                "travel-sim",
+                "pocket-wifi",
+                "enterprise"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "recommend_plan",
+        "title": "Recommend a plan",
+        "description": "Recommend the best Air-Roam plan for a trip. Given a destination slug, trip length in days and expected data usage in GB, returns the cheapest plan that fits and 2 alternatives.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "destination": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Country slug, e.g. 'japan'."
+            },
+            "days": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "Trip length in days."
+            },
+            "dataGB": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Expected total data usage across the trip, in GB. Use a large value for heavy streaming."
+            },
+            "travelers": {
+              "description": "Number of travelers, defaults to 1.",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "destination",
+            "days",
+            "dataGB"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_regions",
+        "title": "List regions",
+        "description": "List Air-Roam coverage regions with the destinations included in each.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
