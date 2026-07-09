@@ -54,11 +54,9 @@ export function FlightArcLayer() {
 
   return (
     <group>
-      {/* @ts-expect-error drei/r3f line intrinsic */}
-      <line ref={lineRef}>
+      <line ref={lineRef as unknown as React.Ref<Line>}>
         <bufferGeometry />
         <lineBasicMaterial color={AMBER} linewidth={2} transparent opacity={0.9} toneMapped={false} />
-      {/* @ts-expect-error drei/r3f line intrinsic */}
       </line>
       <mesh ref={headRef} position={latLngToVec3(DEFAULT_ORIGIN.lat, DEFAULT_ORIGIN.lng, 1).toArray()}>
         <sphereGeometry args={[0.018, 12, 12]} />
