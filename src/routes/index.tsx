@@ -161,6 +161,8 @@ function HomePage() {
         </div>
       </section>
 
+      <GlobeSection />
+
       {/* AI ASSISTANT TEASER */}
       <section className="px-6 py-24">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-border bg-card shadow-elevated">
