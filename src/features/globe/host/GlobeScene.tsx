@@ -10,6 +10,7 @@ import { OriginPinLayer } from "../layers/OriginPinLayer";
 import { CameraController } from "./CameraController";
 import { useGlobe } from "../useGlobe";
 import { globeActions } from "../store";
+import { GlobeErrorBoundary } from "./GlobeErrorBoundary";
 import { detectPerfTier } from "../performance";
 
 export function GlobeScene() {
