@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useGlobe } from "../useGlobe";
 import { hasWebGL, prefersReducedMotion } from "../performance";
 import { globeActions } from "../store";
+import { GlobeErrorBoundary } from "./GlobeErrorBoundary";
 
 const GlobeCanvas = lazy(() =>
   import("./GlobeCanvas").then((m) => ({ default: m.GlobeCanvas })),
@@ -40,9 +41,11 @@ export function GlobeHost() {
         transition: "left 240ms ease, top 240ms ease, width 240ms ease, height 240ms ease",
       }}
     >
-      <Suspense fallback={null}>
-        <GlobeCanvas />
-      </Suspense>
+      <GlobeErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <GlobeCanvas />
+        </Suspense>
+      </GlobeErrorBoundary>
     </div>
   );
 }

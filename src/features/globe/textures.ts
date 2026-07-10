@@ -4,8 +4,9 @@
  * canonical layer; swap the URLs to self-host without touching any component.
  */
 export const TEX = {
-  earthDay: "https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg",
-  earthBump: "https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png",
-  earthSpec: "https://unpkg.com/three-globe@2.31.1/example/img/earth-water.png",
-  clouds: "https://unpkg.com/three-globe@2.31.1/example/img/clouds.png",
+  earthDay: "https://cdn.jsdelivr.net/npm/three-globe@2.31.1/example/img/earth-blue-marble.jpg",
+  earthBump: "https://cdn.jsdelivr.net/npm/three-globe@2.31.1/example/img/earth-topology.png",
+  earthSpec: "https://cdn.jsdelivr.net/npm/three-globe@2.31.1/example/img/earth-water.png",
+  clouds:
+    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png",
 } as const;

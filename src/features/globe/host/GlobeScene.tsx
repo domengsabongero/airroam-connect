@@ -10,6 +10,7 @@ import { OriginPinLayer } from "../layers/OriginPinLayer";
 import { CameraController } from "./CameraController";
 import { useGlobe } from "../useGlobe";
 import { globeActions } from "../store";
+import { GlobeErrorBoundary } from "./GlobeErrorBoundary";
 import { detectPerfTier } from "../performance";
 
 export function GlobeScene() {
@@ -42,10 +43,12 @@ export function GlobeScene() {
       <directionalLight position={[5, 3, 5]} intensity={1.15} color="#fff4d6" />
       <directionalLight position={[-4, -2, -3]} intensity={0.35} color="#8ec5ff" />
 
-      <Suspense fallback={null}>
-        {layers.earth && <EarthLayer />}
-        {showClouds && <CloudsLayer />}
-      </Suspense>
+      <GlobeErrorBoundary fallback={null}>
+        <Suspense fallback={null}>{layers.earth && <EarthLayer />}</Suspense>
+      </GlobeErrorBoundary>
+      <GlobeErrorBoundary fallback={null}>
+        <Suspense fallback={null}>{showClouds && <CloudsLayer />}</Suspense>
+      </GlobeErrorBoundary>
       {layers.atmosphere && <AtmosphereLayer />}
       {layers.origin && <OriginPinLayer />}
       {layers.markers && <CountryMarkersLayer />}
