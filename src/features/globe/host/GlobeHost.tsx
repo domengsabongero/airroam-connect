@@ -41,9 +41,11 @@ export function GlobeHost() {
         transition: "left 240ms ease, top 240ms ease, width 240ms ease, height 240ms ease",
       }}
     >
-      <Suspense fallback={null}>
-        <GlobeCanvas />
-      </Suspense>
+      <GlobeErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <GlobeCanvas />
+        </Suspense>
+      </GlobeErrorBoundary>
     </div>
   );
 }
