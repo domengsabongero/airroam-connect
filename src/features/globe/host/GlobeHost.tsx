@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useGlobe } from "../useGlobe";
 import { hasWebGL, prefersReducedMotion } from "../performance";
 import { globeActions } from "../store";
+import { GlobeErrorBoundary } from "./GlobeErrorBoundary";
 
 const GlobeCanvas = lazy(() =>
   import("./GlobeCanvas").then((m) => ({ default: m.GlobeCanvas })),
